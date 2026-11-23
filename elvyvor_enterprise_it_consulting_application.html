@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elvyvor - Enterprise IT Consulting</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              950: '#020617',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- React & Babel Scripts -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons Bundle -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    /* Custom scrollbar for modern dark theme aesthetic */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-T8BNJ36H"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Helper component to render Lucide Icons dynamically
+    const Icon = ({ name, className = "w-4 h-4" }) => {
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      }, [name]);
+
+      return <i data-lucide={name} className={className}></i>;
+    };
+
+    function App() {
+      // Navigation & Page State
+      const [activeTab, setActiveTab] = useState('insights');
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+      // Modals & Overlay States
+      const [searchOpen, setSearchOpen] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [chatbotOpen, setChatbotOpen] = useState(false);
+      const [roiModalOpen, setRoiModalOpen] = useState(false);
+      const [archModalOpen, setArchModalOpen] = useState(false);
+      const [regionModalOpen, setRegionModalOpen] = useState(false);
+      const [selectedCaseStudy, setSelectedCaseStudy] = useState(null);
+      
+      // Footer Link Modal States
+      const [policyModal, setPolicyModal] = useState(null); // 'privacy' | 'terms' | 'security' | null
+
+      // Selected Region
+      const [selectedRegion, setSelectedRegion] = useState('Asia Pacific (India - HQ)');
+
+      // ROI Calculator State
+      const [roiInputs, setRoiInputs] = useState({ employees: 500, legacyCost: 120000 });
+      const [roiResult, setRoiResult] = useState(null);
+
+      // Chatbot State
+      const [chatMessages, setChatMessages] = useState([
+        { sender: 'bot', text: 'Hello! I am Elvyvor AI Assistant. How can I assist your enterprise IT strategy today?' }
+      ]);
+      const [chatInput, setChatInput] = useState('');
+
+      // Refresh Lucide icons whenever state updates or component re-renders
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
+
+      // Industry Case Studies Data Structure
+      const caseStudiesData = {
+        banking: {
+          id: 'banking',
+          title: "Banking & Financial Services",
+          subtitle: "Core Banking Modernization & Algorithmic Fraud Defense System",
+          client: "Global Tier-1 Commercial Bank",
+          industry: "Financial Services / FinTech",
+          execSummary: "Engineered a microservices-based transaction core integrated with real-time ML anti-fraud evaluation, processing over 14,000 requests/sec with latency under 12ms.",
+          challenge: "Legacy COBOL mainframe infrastructure suffered frequent bottlenecks during peak market volumes, with elevated operational costs and delayed fraud detection.",
+          architecture: [
+            "Event-driven CQRS microservices architecture hosted on multi-region AWS EKS.",
+            "Kafka transaction pipeline feeding real-time TensorFlow anomaly models.",
+            "PCI-DSS compliant zero-trust API gateway with tokenized database access."
+          ],
+          techStack: ["React", "Go / Node.js", "Apache Kafka", "AWS EKS", "TensorFlow", "PostgreSQL", "Redis"],
+          impact: [
+            { label: "Throughput Surge", value: "340%" },
+            { label: "Fraud Prevention Loss Saved", value: "$18.4M/yr" },
+            { label: "Infra Operating Cost Cut", value: "42%" }
+          ]
+        },
+        healthcare: {
+          id: 'healthcare',
+          title: "Healthcare & Life Sciences",
+          subtitle: "HIPAA-Compliant Federated Cloud Analytics & Tele-Health Engine",
+          client: "Multinational Healthcare Provider & Research Network",
+          industry: "Healthcare & Biotech",
+          execSummary: "Architected a HIPAA & GDPR compliant unified patient data lake with automated AI diagnostic pipelines and encrypted tele-health APIs.",
+          challenge: "Siloed EHR databases across 48 hospitals made clinical collaboration impossible and delayed urgent diagnostic imaging reviews.",
+          architecture: [
+            "Federated Snowflake Data Lakehouse with end-to-end homomorphic encryption.",
+            "DICOM medical imaging pipeline running GPU-accelerated AI classification models.",
+            "OAuth2 & SAML 2.0 Identity Governance with automated audit compliance logs."
+          ],
+          techStack: ["Python", "Snowflake", "Azure Healthcare APIs", "PyTorch", "Docker", "Terraform"],
+          impact: [
+            { label: "Diagnostic SLA Speedup", value: "65%" },
+            { label: "Patient Data Privacy Rating", value: "100%" },
+            { label: "Cross-Hospital Sync", value: "Real-time" }
+          ]
+        },
+        retail: {
+          id: 'retail',
+          title: "Retail & E-Commerce",
+          subtitle: "Omnichannel Inventory Orchestration & Dynamic Recommendation Engine",
+          client: "Global Omni-channel Retail Enterprise (4,000+ Stores)",
+          industry: "Retail & Consumer Goods",
+          execSummary: "Constructed an automated real-time inventory synchronization engine paired with a GenAI personalized customer recommendation engine.",
+          challenge: "Stockout mismatches during high-volume sales events caused customer churn and $32M in lost seasonal revenue.",
+          architecture: [
+            "Distributed Event Sourcing on Google Cloud Platform (GCP) with Redis Enterprise.",
+            "Edge computing node sync at point-of-sale systems for offline-first catalog updates.",
+            "Vector Search Engine for real-time semantic query processing and upsells."
+          ],
+          techStack: ["Next.js", "GCP BigQuery", "Redis Cloud", "Pinecone Vector DB", "Kubernetes"],
+          impact: [
+            { label: "Order Conversion Boost", value: "+28.5%" },
+            { label: "Stockout Reduction", value: "88%" },
+            { label: "Peak Black Friday Uptime", value: "99.999%" }
+          ]
+        },
+        manufacturing: {
+          id: 'manufacturing',
+          title: "Manufacturing & Industry 4.0",
+          subtitle: "IoT Telemetry Platform & Predictive Machine Maintenance",
+          client: "Global Automotive & Precision Parts Manufacturer",
+          industry: "Industrial Manufacturing",
+          execSummary: "Deployed Edge-AI IoT telemetry collectors across 18 smart manufacturing facilities to predict machinery breakdowns prior to failure.",
+          challenge: "Unplanned factory line outages cost the client approximately $450,000 per hour in idle labor and lost output.",
+          architecture: [
+            "MQTT Broker cluster processing 50,000 IoT sensor feeds per second.",
+            "On-premise Edge Micro-clusters running anomaly detection models.",
+            "Automated SAP ERP maintenance dispatch integration."
+          ],
+          techStack: ["C++ / Rust (Edge)", "Python", "MQTT", "AWS Greengrass", "Grafana", "TimescaleDB"],
+          impact: [
+            { label: "Unplanned Outage Reduction", value: "74%" },
+            { label: "Annual Machinery Lifespan", value: "+4.2 Yrs" },
+            { label: "Saved Downtime Expense", value: "$31.2M" }
+          ]
+        },
+        telecom: {
+          id: 'telecom',
+          title: "Telecommunications",
+          subtitle: "5G Edge Service Orchestration & Automated Billing Engine",
+          client: "National Tier-1 Telecom Operator",
+          industry: "Telecommunications",
+          execSummary: "Rebuilt core billing and network slice orchestration systems into cloud-native microservices capable of processing billable events in milliseconds.",
+          challenge: "Monolithic legacy billing software created multi-hour reconciliation delays and prevented agile rollout of 5G enterprise network slices.",
+          architecture: [
+            "Open-Telemetry network monitoring mesh with automated eBPF packet inspection.",
+            "Multi-cloud carrier edge compute nodes (AWS Wavelength & Azure Edge Zones).",
+            "Reactive microservices mesh handling concurrent billing events."
+          ],
+          techStack: ["Java / Quarkus", "eBPF", "Kubernetes", "Apache Cassandra", "Prometheus"],
+          impact: [
+            { label: "Billing Reconciliation Speed", value: "100x" },
+            { label: "New 5G Tier Launch Time", value: "-75%" },
+            { label: "System Latency", value: "< 4ms" }
+          ]
+        },
+        energy: {
+          id: 'energy',
+          title: "Energy & Smart Utilities",
+          subtitle: "Smart Grid Data Ingestion & Clean Energy Load Balancing",
+          client: "Regional Power Distribution Network",
+          industry: "Energy & Utilities",
+          execSummary: "Implemented an automated smart grid analytics platform balancing grid loads in real time while integrating renewable solar & wind feeds.",
+          challenge: "Renewable energy spikes caused voltage fluctuations and manual grid load redistribution was too slow to prevent grid strain.",
+          architecture: [
+            "High-throughput Apache Flink stream analytics engine.",
+            "Automated load shedding and battery storage feedback control loops.",
+            "ISO 27019 & NERC CIP compliant secure utility network isolation."
+          ],
+          techStack: ["Scala / Apache Flink", "Python", "InfluxDB", "Microsoft Azure", "Docker"],
+          impact: [
+            { label: "Renewable Integration Cap", value: "+210%" },
+            { label: "Grid Anomaly Reaction Time", value: "< 1.2s" },
+            { label: "Carbon Footprint Cut", value: "18%" }
+          ]
+        }
+      };
+
+      // Scroll to top on page navigation
+      const navigateTo = (tab) => {
+        setActiveTab(tab);
+        setMobileMenuOpen(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      // Chatbot Message Handling
+      const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (!chatInput.trim()) return;
+
+        const newMessages = [...chatMessages, { sender: 'user', text: chatInput }];
+        setChatMessages(newMessages);
+        const userMsg = chatInput;
+        setChatInput('');
+
+        setTimeout(() => {
+          let botReply = "Thank you for reaching out. Our enterprise advisory team will evaluate your needs.";
+          const lower = userMsg.toLowerCase();
+          if (lower.includes('contact') || lower.includes('email') || lower.includes('phone')) {
+            botReply = "You can contact our main office directly at +91 9869043555 or email connect@elvyvor.com.";
+          } else if (lower.includes('cloud') || lower.includes('digital') || lower.includes('ai') || lower.includes('service')) {
+            botReply = "Elvyvor specializes in Cloud Orchestration, GenAI Enterprise Pipelines, Legacy Modernization, and Zero-Trust Cyber Operations.";
+          } else if (lower.includes('case') || lower.includes('banking') || lower.includes('retail') || lower.includes('health')) {
+            botReply = "Check out our 'Industries' page! Click 'REQUEST CASE STUDY' on any domain card to view complete architecture blueprints and impact metrics.";
+          } else if (lower.includes('career') || lower.includes('job')) {
+            botReply = "We are hiring principal architects and AI leaders! Navigate to the 'Careers' page to apply.";
+          }
+
+          setChatMessages(prev => [...prev, { sender: 'bot', text: botReply }]);
+        }, 600);
+      };
+
+      // Calculate ROI
+      const calculateROI = (e) => {
+        e.preventDefault();
+        const annualSavings = Math.round(roiInputs.legacyCost * 0.42);
+        const productivityGain = Math.round(roiInputs.employees * 1650);
+        const netROI = Math.round(((annualSavings + productivityGain) / (roiInputs.legacyCost * 0.45)) * 100);
+        setRoiResult({ annualSavings, productivityGain, netROI });
+      };
+
+      return (
+        <div className="min-h-screen bg-[#030712] text-slate-100 font-sans antialiased flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950">
+          
+          {/* 1. GLOBAL ANNOUNCEMENT / TOP UTILITY BAR */}
+          <div className="bg-[#0b1329] border-b border-slate-800/80 text-xs py-2 px-4 md:px-8 flex flex-wrap justify-between items-center text-slate-400">
+            <div className="flex items-center space-x-6">
+              <a href="tel:+919869043555" className="flex items-center hover:text-cyan-400 transition-colors">
+                <Icon name="phone" className="w-3.5 h-3.5 text-cyan-400 mr-1.5" /> +91 9869043555
+              </a>
+              <a href="mailto:connect@elvyvor.com" className="hidden sm:flex items-center hover:text-cyan-400 transition-colors">
+                <Icon name="mail" className="w-3.5 h-3.5 text-cyan-400 mr-1.5" /> connect@elvyvor.com
+              </a>
+              <span className="hidden md:inline text-cyan-400 font-semibold border-l border-slate-800 pl-4">
+                HQ: Enterprise Technology Center, Cyber Tech City
+              </span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setRegionModalOpen(true)} 
+                className="hover:text-cyan-400 flex items-center transition-colors bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-800"
+              >
+                <Icon name="globe" className="w-3.5 h-3.5 mr-1.5 text-cyan-400" /> {selectedRegion} <Icon name="chevron-down" className="w-3 h-3 ml-1" />
+              </button>
+              <button 
+                onClick={() => setRoiModalOpen(true)} 
+                className="text-cyan-400 font-semibold hover:underline flex items-center bg-cyan-950/60 border border-cyan-800/50 px-2.5 py-1 rounded-md"
+              >
+                <Icon name="calculator" className="w-3.5 h-3.5 mr-1.5" /> ROI Calculator
+              </button>
+            </div>
+          </div>
+
+          {/* 2. MAIN NAVIGATION BAR */}
+          <nav className="sticky top-0 z-40 bg-[#030712]/95 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-8 py-3.5">
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
+              {/* Brand Logo */}
+              <button onClick={() => navigateTo('home')} className="flex items-center space-x-3 text-left group">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 font-extrabold text-xl group-hover:scale-105 transition-transform">
+                  E
+                </div>
+                <div>
+                  <span className="text-xl font-black tracking-wider bg-gradient-to-r from-white via-slate-100 to-cyan-400 bg-clip-text text-transparent">ELVYVOR</span>
+                  <span className="block text-[10px] tracking-widest uppercase text-cyan-400 font-bold">Enterprise IT Consulting</span>
+                </div>
+              </button>
+
+              {/* Desktop Navigation Tabs */}
+              <div className="hidden xl:flex items-center space-x-1 font-medium text-xs">
+                {[
+                  { id: 'home', label: 'Home' },
+                  { id: 'services', label: 'Digital Services' },
+                  { id: 'industries', label: 'Industries' },
+                  { id: 'solutions', label: 'Enterprise Solutions' },
+                  { id: 'insights', label: 'Insights & Research' },
+                  { id: 'about', label: 'About Us' },
+                  { id: 'careers', label: 'Careers' },
+                  { id: 'contact', label: 'Contact Us' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => navigateTo(tab.id)}
+                    className={`px-3 py-2 rounded-lg transition-all ${
+                      activeTab === tab.id 
+                        ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm font-semibold' 
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Action CTAs */}
+              <div className="flex items-center space-x-3">
+                <button 
+                  onClick={() => setSearchOpen(true)} 
+                  className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+                  title="Search Portal"
+                >
+                  <Icon name="search" className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={() => navigateTo('contact')}
+                  className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/40"
+                >
+                  Consult Advisory
+                </button>
+
+                {/* Mobile Navigation Hamburger */}
+                <button 
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+                  className="xl:hidden p-2 text-slate-300 hover:text-white"
+                >
+                  <Icon name={mobileMenuOpen ? "x" : "menu"} className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Dropdown Navigation */}
+            {mobileMenuOpen && (
+              <div className="xl:hidden mt-3 pt-3 border-t border-slate-800 grid grid-cols-2 gap-2 pb-2">
+                {[
+                  { id: 'home', label: 'Home' },
+                  { id: 'services', label: 'Digital Services' },
+                  { id: 'industries', label: 'Industries' },
+                  { id: 'solutions', label: 'Enterprise Solutions' },
+                  { id: 'insights', label: 'Insights & Research' },
+                  { id: 'about', label: 'About Us' },
+                  { id: 'careers', label: 'Careers' },
+                  { id: 'contact', label: 'Contact Us' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => navigateTo(tab.id)}
+                    className={`p-2 text-left rounded-lg text-xs font-semibold ${
+                      activeTab === tab.id ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </nav>
+
+          {/* PAGE VIEW RENDERER */}
+          <main className="flex-grow">
+            
+            {/* VIEW 1: HOME PAGE */}
+            {activeTab === 'home' && (
+              <div className="space-y-20 pb-16">
+                {/* Hero Section */}
+                <section className="relative overflow-hidden py-20 lg:py-28 bg-gradient-to-b from-[#030712] via-[#091124] to-[#030712] border-b border-slate-800/80">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(6,182,212,0.12),transparent_50%)] pointer-events-none"></div>
+                  <div className="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-6">
+                      <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+                        <Icon name="sparkles" className="w-3.5 h-3.5" />
+                        <span>Global Technology Advisory</span>
+                      </div>
+                      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
+                        Engineering Modern Foundations for Enterprise Leaders
+                      </h1>
+                      <p className="text-slate-400 text-base sm:text-lg leading-relaxed">
+                        Elvyvor equips global organizations with enterprise GenAI orchestration, hybrid multi-cloud systems, high-throughput microservices, and zero-trust cyber defense.
+                      </p>
+                      <div className="flex flex-wrap gap-4 pt-2">
+                        <button 
+                          onClick={() => navigateTo('contact')} 
+                          className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm flex items-center space-x-2 shadow-lg shadow-cyan-500/25 transition-all"
+                        >
+                          <span>Request Strategic Audit</span>
+                          <Icon name="arrow-right" className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setArchModalOpen(true)} 
+                          className="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-sm flex items-center space-x-2 transition-all"
+                        >
+                          <Icon name="layers" className="w-4 h-4 text-cyan-400" />
+                          <span>Architecture Specs</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Dashboard Tech Graphic */}
+                    <div className="relative bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur">
+                      <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                        <div className="flex space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                          <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                          <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <span className="text-xs font-mono text-cyan-400 font-semibold flex items-center">
+                          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></span>
+                          SYSTEM STATUS: OPTIMAL
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                          <p className="text-xs text-slate-400 mb-1">Cloud Automation Index</p>
+                          <p className="text-2xl font-black text-white">99.99%</p>
+                          <span className="text-xs text-green-400 flex items-center mt-1 font-semibold">+14.2% vs industry average</span>
+                        </div>
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                          <p className="text-xs text-slate-400 mb-1">AI Pipeline Processing</p>
+                          <p className="text-2xl font-black text-cyan-400">6.4 TB/s</p>
+                          <span className="text-xs text-cyan-400 flex items-center mt-1 font-semibold">Real-time low latency</span>
+                        </div>
+                      </div>
+                      <div className="bg-slate-950 rounded-xl p-4 border border-slate-800 text-xs font-mono text-slate-300 space-y-2">
+                        <div className="flex justify-between text-slate-500">
+                          <span>ORCHESTRATION NODE</span>
+                          <span>CLUSTER #GLOBAL-08</span>
+                        </div>
+                        <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden">
+                          <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full w-[92%]"></div>
+                        </div>
+                        <p className="text-[11px] text-slate-400">Zero security vulnerabilities detected in last 30 days.</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Core Strategic Pillars */}
+                <section className="max-w-7xl mx-auto px-4 md:px-8">
+                  <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Capabilities</span>
+                    <h2 className="text-3xl font-black text-white">Transforming Enterprise IT Capabilities</h2>
+                    <p className="text-slate-400 text-sm">Tailored engineering strategies for resiliency, security, and continuous innovation.</p>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-8">
+                    {[
+                      {
+                        icon: "cpu",
+                        color: "text-cyan-400",
+                        title: "Enterprise AI & Automation",
+                        desc: "Deploy proprietary GenAI models, LLM guardrails, and automated enterprise logic to streamline operational workflow bottlenecks."
+                      },
+                      {
+                        icon: "shield",
+                        color: "text-indigo-400",
+                        title: "Zero-Trust Cyber Governance",
+                        desc: "Proactive threat intelligence, 24/7 Security Operations Centers (SOC), and regulatory compliance posture engineering."
+                      },
+                      {
+                        icon: "globe",
+                        color: "text-blue-400",
+                        title: "Cloud & DevSecOps Architecture",
+                        desc: "Multi-cloud architecture (AWS, Azure, GCP) optimized for high transaction throughput, minimal latency, and cost reduction."
+                      }
+                    ].map((item, idx) => (
+                      <div key={idx} className="bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-8 rounded-2xl transition-all hover:-translate-y-1">
+                        <div className="mb-6 p-3 bg-slate-950 rounded-xl inline-block border border-slate-800">
+                          <Icon name={item.icon} className={`w-7 h-7 ${item.color}`} />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
+                        <p className="text-slate-400 text-sm leading-relaxed mb-6">{item.desc}</p>
+                        <button 
+                          onClick={() => navigateTo('services')}
+                          className="text-cyan-400 text-xs font-bold hover:text-cyan-300 flex items-center space-x-1"
+                        >
+                          <span>Explore service details</span>
+                          <Icon name="chevron-right" className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Interactive ROI Banner */}
+                <section className="max-w-7xl mx-auto px-4 md:px-8">
+                  <div className="bg-gradient-to-r from-cyan-950/60 via-blue-950/40 to-slate-900 border border-cyan-500/30 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
+                    <div className="space-y-3 max-w-2xl">
+                      <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Financial Impact Benchmarking</span>
+                      <h3 className="text-2xl md:text-3xl font-extrabold text-white">Quantify Potential Legacy Modernization Savings</h3>
+                      <p className="text-slate-300 text-sm">Calculate projected annual cost reductions, efficiency multipliers, and ROI payback periods using our financial tool.</p>
+                    </div>
+                    <button 
+                      onClick={() => setRoiModalOpen(true)}
+                      className="whitespace-nowrap px-6 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-cyan-500/20"
+                    >
+                      Launch ROI Calculator
+                    </button>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {/* VIEW 2: DIGITAL SERVICES */}
+            {activeTab === 'services' && (
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
+                <div className="border-b border-slate-800 pb-8">
+                  <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Services Practice</span>
+                  <h1 className="text-4xl font-extrabold text-white mt-2">Digital Services & Technology Consulting</h1>
+                  <p className="text-slate-400 mt-3 max-w-3xl text-sm leading-relaxed">Comprehensive technology services designed to modernize legacy infrastructures, automate operations, and ensure operational agility.</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  {[
+                    { title: "Application Modernization & Core Engineering", desc: "Refactor legacy monolithic applications into decoupled cloud-native microservices with zero operational downtime.", items: ["Monolith to Microservices Refactoring", "GraphQL & REST API Gateways", "Mainframe Modernization & Migration"] },
+                    { title: "Enterprise AI & Advanced Data Analytics", desc: "Unlock hidden business intelligence through unified data lakes, real-time analytics, and enterprise GenAI models.", items: ["Predictive Analytics & Forecasting", "Private GenAI & LLM Integration", "Snowflake & Databricks Lakehouse"] },
+                    { title: "Cloud & Infrastructure Modernization", desc: "End-to-end cloud strategy, seamless cloud migration, and continuous multi-cloud automated operations.", items: ["Multi-Cloud Strategy (AWS/Azure/GCP)", "DevSecOps & CI/CD Pipelines", "24/7 Managed Cloud Infrastructure"] },
+                    { title: "Cybersecurity Governance & Resilience", desc: "Comprehensive threat vulnerability assessment, SOC monitoring, and international security compliance.", items: ["Zero Trust Network Architecture", "Managed SOC & Incident Response", "ISO27001, SOC2 & GDPR Compliance"] }
+                  ].map((srv, idx) => (
+                    <div key={idx} className="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl space-y-4 hover:border-slate-700 transition-colors">
+                      <h3 className="text-2xl font-bold text-white">{srv.title}</h3>
+                      <p className="text-slate-400 text-sm leading-relaxed">{srv.desc}</p>
+                      <ul className="space-y-2 pt-2">
+                        {srv.items.map((item, i) => (
+                          <li key={i} className="text-xs text-slate-300 flex items-center">
+                            <Icon name="check-circle-2" className="w-4 h-4 text-cyan-400 mr-2 flex-shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="pt-4">
+                        <button 
+                          onClick={() => navigateTo('contact')}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                        >
+                          Inquire About Practice
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 3: INDUSTRIES & INTERACTIVE CASE STUDIES */}
+            {activeTab === 'industries' && (
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
+                <div className="border-b border-slate-800 pb-8">
+                  <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Industry Practice</span>
+                  <h1 className="text-4xl font-extrabold text-white mt-2">Tailored Domain Solutions</h1>
+                  <p className="text-slate-400 mt-3 max-w-3xl text-sm leading-relaxed">
+                    Deep vertical expertise across critical sectors. Click <strong>REQUEST CASE STUDY</strong> on any domain card below to launch an interactive document view detailing technical blueprints, architecture specs, and impact metrics.
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[
+                    { id: 'banking', icon: "building-2", color: "text-cyan-400", title: "Banking & Financial Services", desc: "Core banking modernization, real-time fraud engines, and PCI-compliant microservices." },
+                    { id: 'healthcare', icon: "shield", color: "text-indigo-400", title: "Healthcare & Life Sciences", desc: "HIPAA-compliant data pipelines, AI diagnostic support, and encrypted tele-health platforms." },
+                    { id: 'retail', icon: "users", color: "text-blue-400", title: "Retail & E-Commerce", desc: "Omnichannel inventory synchronization, real-time recommendations, and edge POS networks." },
+                    { id: 'manufacturing', icon: "cpu", color: "text-cyan-400", title: "Manufacturing & Industry 4.0", desc: "IoT sensor telemetry, edge anomaly models, and predictive maintenance dispatch." },
+                    { id: 'telecom', icon: "globe", color: "text-indigo-400", title: "Telecommunications", desc: "5G edge slice orchestration, carrier edge networks, and automated billing engines." },
+                    { id: 'energy', icon: "zap", color: "text-yellow-400", title: "Energy & Utilities", desc: "Smart grid analytics, clean energy load balancing, and regulatory compliance monitoring." }
+                  ].map((ind) => (
+                    <div key={ind.id} className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between hover:border-cyan-500/50 transition-all group">
+                      <div>
+                        <div className="p-3 bg-slate-950 rounded-xl inline-block border border-slate-800 mb-4">
+                          <Icon name={ind.icon} className={`w-6 h-6 ${ind.color}`} />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">{ind.title}</h3>
+                        <p className="text-slate-400 text-xs leading-relaxed mb-6">{ind.desc}</p>
+                      </div>
+                      <button 
+                        onClick={() => setSelectedCaseStudy(caseStudiesData[ind.id])}
+                        className="w-full py-2.5 px-4 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-2 border border-slate-700/80 hover:border-cyan-400"
+                      >
+                        <span>REQUEST CASE STUDY</span>
+                        <Icon name="arrow-up-right" className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 4: ENTERPRISE SOLUTIONS */}
+            {activeTab === 'solutions' && (
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
+                <div className="border-b border-slate-800 pb-8">
+                  <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Accelerators</span>
+                  <h1 className="text-4xl font-extrabold text-white mt-2">Enterprise Solutions & Frameworks</h1>
+                  <p className="text-slate-400 mt-3 max-w-3xl text-sm leading-relaxed">Pre-engineered software accelerators designed to speed up deployment timelines by up to 50% while maintaining compliance.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {[
+                    { name: "Elvyvor Core-Sync™", tag: "Legacy Data Integration", desc: "Stream live legacy database events into modern GraphQL and REST endpoints with zero downtime." },
+                    { name: "Elvyvor AI-Shield™", tag: "Private GenAI Governance", desc: "Deploy enterprise LLM models with built-in PII masking, token audit logs, and security guardrails." },
+                    { name: "Elvyvor Multi-Cloud Ops Blueprint", tag: "IaC & Kubernetes Acceleration", desc: "Automated Terraform & Helm configurations for instant multi-region ISO27001-compliant clusters." }
+                  ].map((sol, idx) => (
+                    <div key={idx} className="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl md:flex items-center justify-between gap-8">
+                      <div className="space-y-2 mb-4 md:mb-0">
+                        <span className="text-xs text-cyan-400 font-mono uppercase bg-cyan-950/80 px-2.5 py-1 rounded border border-cyan-800">{sol.tag}</span>
+                        <h3 className="text-2xl font-bold text-white mt-2">{sol.name}</h3>
+                        <p className="text-slate-400 text-sm max-w-2xl leading-relaxed">{sol.desc}</p>
+                      </div>
+                      <button 
+                        onClick={() => setArchModalOpen(true)}
+                        className="whitespace-nowrap px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-bold uppercase tracking-wider transition-all border border-slate-700"
+                      >
+                        View Specs
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 5: INSIGHTS & RESEARCH */}
+            {activeTab === 'insights' && (
+              <div className="max-w-[1240px] mx-auto px-4 md:px-8 py-10 space-y-10">
+                <div className="border-b border-slate-800/60 pb-8">
+                  <span className="text-[#00D1FF] text-xs font-extrabold uppercase tracking-widest">
+                    RESEARCH & LEADERSHIP
+                  </span>
+                  <h1 className="text-4xl md:text-5xl font-black text-white mt-2 tracking-tight">
+                    Insights & Technology Reports
+                  </h1>
+                  <p className="text-slate-400 mt-3 max-w-4xl text-sm leading-relaxed">
+                    Strategic analysis and whitepapers authored by Elvyvor solution directors for technology decision makers.
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[
+                    {
+                      category: "AI Strategy",
+                      tag: "Q1 2026 Research",
+                      title: "2026 Enterprise Generative AI Benchmark Report",
+                      desc: "Actionable benchmarking data and architectural methodologies for enterprise executives."
+                    },
+                    {
+                      category: "Cloud Architecture",
+                      tag: "Technical Paper",
+                      title: "Migrating Monoliths to Event-Driven Cloud Architectures",
+                      desc: "Actionable benchmarking data and architectural methodologies for enterprise executives."
+                    },
+                    {
+                      category: "Cybersecurity",
+                      tag: "Executive Summary",
+                      title: "Zero-Trust Security Metrics for Multi-Cloud Environments",
+                      desc: "Actionable benchmarking data and architectural methodologies for enterprise executives."
+                    }
+                  ].map((art, idx) => (
+                    <div 
+                      key={idx} 
+                      className="bg-[#070e1e] border border-[#121f3a] rounded-2xl p-6 flex flex-col justify-between hover:border-[#1d3058] transition-all shadow-xl min-h-[320px]"
+                    >
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-[#00D1FF] font-bold tracking-wide">
+                            {art.category}
+                          </span>
+                          <span className="text-[#7d8b9e]">
+                            {art.tag}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-bold text-white leading-snug tracking-tight">
+                          {art.title}
+                        </h3>
+                        <p className="text-[#8e9cb0] text-xs leading-relaxed pt-1">
+                          {art.desc}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => navigateTo('contact')}
+                        className="mt-8 w-full py-3 bg-[#13223f] hover:bg-[#1a2d52] border border-[#1d335c] rounded-xl text-xs font-bold text-slate-200 transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <Icon name="file-text" className="w-4 h-4 text-[#00D1FF]" />
+                        <span>Contact Us</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 6: ABOUT US */}
+            {activeTab === 'about' && (
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
+                <div className="border-b border-slate-800 pb-8">
+                  <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Company Overview</span>
+                  <h1 className="text-4xl font-extrabold text-white mt-2">About Elvyvor IT Consulting</h1>
+                  <p className="text-slate-400 mt-3 max-w-3xl text-sm leading-relaxed">A global technology consulting partner delivering complex enterprise digital transformations.</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                  <div className="space-y-4 text-slate-300 text-sm leading-relaxed">
+                    <h2 className="text-2xl font-bold text-white">Engineering Resilient Digital Systems</h2>
+                    <p>Founded on engineering excellence, Elvyvor collaborates with global leaders to design adaptable, secure, and performant digital infrastructures.</p>
+                    <p>Our multidisciplinary team of cloud architects, data engineers, and cybersecurity specialists brings extensive experience across legacy refactoring and AI integration.</p>
+                    <div className="grid grid-cols-2 gap-4 pt-4 text-center">
+                      <div className="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <p className="text-3xl font-extrabold text-cyan-400">99.4%</p>
+                        <p className="text-xs text-slate-400 mt-1">Client Retention Rate</p>
+                      </div>
+                      <div className="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <p className="text-3xl font-extrabold text-indigo-400">140+</p>
+                        <p className="text-xs text-slate-400 mt-1">Enterprise Deployments</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 space-y-6">
+                    <h3 className="text-xl font-bold text-white">Our Core Leadership Values</h3>
+                    {[
+                      { title: "Technical Rigor", desc: "No compromises on software architecture quality or security controls." },
+                      { title: "Outcome-Driven Consulting", desc: "We measure success by verifiable operational metrics and financial ROI." },
+                      { title: "Global Regulatory Compliance", desc: "Built to adhere strictly to international data sovereignty and privacy frameworks." }
+                    ].map((val, idx) => (
+                      <div key={idx} className="flex space-x-4">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                          {idx + 1}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-white">{val.title}</h4>
+                          <p className="text-xs text-slate-400 mt-1">{val.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 7: CAREERS */}
+            {activeTab === 'careers' && (
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
+                <div className="border-b border-slate-800 pb-8">
+                  <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Careers</span>
+                  <h1 className="text-4xl font-extrabold text-white mt-2">Join Elvyvor Practice Labs</h1>
+                  <p className="text-slate-400 mt-3 max-w-3xl text-sm leading-relaxed">Work with global enterprise clients building cloud solutions and AI pipelines.</p>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { title: "Principal Multi-Cloud Architect", dept: "Cloud Practice", loc: "Remote / Hybrid", type: "Full-Time" },
+                    { title: "Senior Enterprise AI & ML Engineer", dept: "AI Engineering", loc: "Hybrid", type: "Full-Time" },
+                    { title: "Lead Cyber Security Solutions Consultant", dept: "SecOps", loc: "On-Site / Hybrid", type: "Full-Time" },
+                    { title: "Global Client Director", dept: "Advisory Services", loc: "Remote", type: "Full-Time" }
+                  ].map((job, idx) => (
+                    <div key={idx} className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-all">
+                      <div>
+                        <h3 className="text-xl font-bold text-white">{job.title}</h3>
+                        <div className="flex space-x-4 text-xs text-slate-400 mt-2">
+                          <span>{job.dept}</span>
+                          <span>•</span>
+                          <span>{job.loc}</span>
+                          <span>•</span>
+                          <span className="text-cyan-400 font-semibold">{job.type}</span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => navigateTo('contact')}
+                        className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold rounded-xl transition-colors whitespace-nowrap"
+                      >
+                        Apply for Position
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 8: CONTACT US */}
+            {activeTab === 'contact' && (
+              <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
+                <div className="border-b border-slate-800 pb-8">
+                  <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">Advisory Engagement</span>
+                  <h1 className="text-4xl font-extrabold text-white mt-2">Contact Enterprise Advisory</h1>
+                  <p className="text-slate-400 mt-3 max-w-3xl text-sm leading-relaxed">Reach out directly to our solution leads and global technology directors.</p>
+                </div>
+
+                <div className="max-w-3xl mx-auto bg-slate-900/60 border border-slate-800 p-8 md:p-12 rounded-3xl space-y-8">
+                  <h2 className="text-2xl font-bold text-white">Global Advisory Center</h2>
+                  
+                  <div className="space-y-6 text-sm">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-xl">
+                        <Icon name="phone" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-semibold">Direct Advisory Phone</p>
+                        <a href="tel:+919869043555" className="text-lg font-bold text-white hover:text-cyan-400 transition-colors">+91 9869043555</a>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-xl">
+                        <Icon name="mail" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-semibold">Corporate Communications Email</p>
+                        <a href="mailto:connect@elvyvor.com" className="text-lg font-bold text-white hover:text-cyan-400 block transition-colors">connect@elvyvor.com</a>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-xl">
+                        <Icon name="map-pin" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-semibold">Corporate Headquarters</p>
+                        <p className="text-slate-200 font-semibold mt-0.5">Elvyvor Enterprise Tower, Cyber Tech City</p>
+                        <p className="text-xs text-slate-400">Maharashtra, India</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-1">
+                    <p className="text-white font-semibold">Service SLA Guarantee:</p>
+                    <p>Advisory inquiries are addressed directly by a principal solution director within 4 business hours.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* FOOTER */}
+          <footer className="bg-[#030712] border-t border-slate-800/80 text-slate-400 py-12 px-4 md:px-8 text-xs">
+            <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+              <div className="col-span-2 md:col-span-1 space-y-3">
+                <span className="text-lg font-bold text-white tracking-wider">ELVYVOR</span>
+                <p className="text-slate-500 leading-relaxed">Enterprise technology consulting powering business resiliency, multi-cloud excellence, and zero-trust security.</p>
+                <p className="text-slate-300 font-semibold">Phone: +91 9869043555</p>
+                <p className="text-slate-300 font-semibold">Email: connect@elvyvor.com</p>
+              </div>
+              <div>
+                <h4 className="text-slate-200 font-bold mb-3 uppercase tracking-wider">Navigation</h4>
+                <ul className="space-y-2">
+                  <li><button onClick={() => navigateTo('home')} className="hover:text-cyan-400">Home</button></li>
+                  <li><button onClick={() => navigateTo('services')} className="hover:text-cyan-400">Digital Services</button></li>
+                  <li><button onClick={() => navigateTo('industries')} className="hover:text-cyan-400">Industries</button></li>
+                  <li><button onClick={() => navigateTo('solutions')} className="hover:text-cyan-400">Enterprise Solutions</button></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-slate-200 font-bold mb-3 uppercase tracking-wider">Company</h4>
+                <ul className="space-y-2">
+                  <li><button onClick={() => navigateTo('insights')} className="hover:text-cyan-400">Insights & Research</button></li>
+                  <li><button onClick={() => navigateTo('about')} className="hover:text-cyan-400">About Us</button></li>
+                  <li><button onClick={() => navigateTo('careers')} className="hover:text-cyan-400">Careers</button></li>
+                  <li><button onClick={() => navigateTo('contact')} className="hover:text-cyan-400">Contact Us</button></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-slate-200 font-bold mb-3 uppercase tracking-wider">Interactive Tools</h4>
+                <ul className="space-y-2">
+                  <li><button onClick={() => setRoiModalOpen(true)} className="hover:text-cyan-400 text-cyan-400 font-bold">ROI Calculator</button></li>
+                  <li><button onClick={() => setArchModalOpen(true)} className="hover:text-cyan-400">Architecture Specs</button></li>
+                  <li><button onClick={() => setChatbotOpen(true)} className="hover:text-cyan-400">AI Assistant</button></li>
+                  <li><button onClick={() => setRegionModalOpen(true)} className="hover:text-cyan-400">Region Selector</button></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto border-t border-slate-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-slate-500">
+              <p>© 2026 Elvyvor Enterprise IT Consulting. All rights reserved.</p>
+              <div className="flex space-x-4 mt-2 sm:mt-0">
+                <button onClick={() => setPolicyModal('privacy')} className="hover:text-cyan-400 hover:underline transition-colors">Privacy Policy</button>
+                <span>•</span>
+                <button onClick={() => setPolicyModal('terms')} className="hover:text-cyan-400 hover:underline transition-colors">Terms of Service</button>
+                <span>•</span>
+                <button onClick={() => setPolicyModal('security')} className="hover:text-cyan-400 hover:underline transition-colors">Security Certifications</button>
+              </div>
+            </div>
+          </footer>
+
+          {/* FLOATING AI CHATBOT BUTTON */}
+          <button 
+            onClick={() => setChatbotOpen(!chatbotOpen)} 
+            className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-2xl hover:scale-105 transition-all flex items-center justify-center border border-cyan-300/30"
+            title="Open Elvyvor AI Assistant"
+          >
+            <Icon name="message-square" className="w-6 h-6" />
+          </button>
+
+          {/* AI CHATBOT DRAWER */}
+          {chatbotOpen && (
+            <div className="fixed bottom-20 right-6 z-50 w-80 sm:w-96 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[500px]">
+              <div className="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <Icon name="sparkles" className="w-4 h-4 text-cyan-400" />
+                  <span className="text-sm font-bold text-white">Elvyvor AI Assistant</span>
+                </div>
+                <button onClick={() => setChatbotOpen(false)} className="text-slate-400 hover:text-white">
+                  <Icon name="x" className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-4 flex-grow overflow-y-auto space-y-3 h-64 text-xs">
+                {chatMessages.map((msg, idx) => (
+                  <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`p-3 rounded-xl max-w-[80%] ${
+                      msg.sender === 'user' ? 'bg-cyan-600 text-white font-medium' : 'bg-slate-800 text-slate-200 border border-slate-700'
+                    }`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-800 bg-slate-950 flex space-x-2">
+                <input 
+                  type="text" 
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Ask about enterprise IT solutions..."
+                  className="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                />
+                <button type="submit" className="p-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg">
+                  <Icon name="send" className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* POLICY / TERMS / CERTIFICATIONS MODAL OVERLAY */}
+          {policyModal && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full my-8 overflow-hidden shadow-2xl relative">
+                
+                {/* Header */}
+                <div className="bg-slate-950 p-6 border-b border-slate-800 flex justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-xl">
+                      <Icon name={policyModal === 'privacy' ? 'shield-check' : policyModal === 'terms' ? 'file-text' : 'award'} className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">
+                        {policyModal === 'privacy' && 'Global Privacy Policy'}
+                        {policyModal === 'terms' && 'Enterprise Terms of Service'}
+                        {policyModal === 'security' && 'Security & Compliance Standards'}
+                      </h2>
+                      <p className="text-xs text-slate-400">Elvyvor Enterprise Governance Portal</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setPolicyModal(null)} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+                    <Icon name="x" className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Body Content */}
+                <div className="p-6 md:p-8 space-y-4 text-xs text-slate-300 max-h-[65vh] overflow-y-auto leading-relaxed">
+                  
+                  {policyModal === 'privacy' && (
+                    <>
+                      <div className="p-3 bg-cyan-950/60 border border-cyan-800/50 rounded-xl text-cyan-300 font-semibold">
+                        Effective Date: January 1, 2026 | Last Updated: Q1 2026
+                      </div>
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 pt-2">1. Data Collection & Usage</h3>
+                      <p>Elvyvor adheres strictly to international data privacy regulations including GDPR, CCPA, and India Digital Personal Data Protection (DPDP) standards. We process client information solely for advisory engagement execution and technical system configuration.</p>
+                      
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 pt-2">2. Information Governance & Security</h3>
+                      <p>All communication channels and advisory metrics are encrypted in transit via TLS 1.3 and at rest via AES-256 standards. We do not sell, rent, or monetize client technical telemetry under any circumstances.</p>
+
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 pt-2">3. Zero-Trust Telemetry</h3>
+                      <p>Our automated diagnostics and cloud telemetry features collect non-identifiable system performance metrics strictly designed to optimize cluster performance and mitigate cybersecurity vulnerabilities.</p>
+                    </>
+                  )}
+
+                  {policyModal === 'terms' && (
+                    <>
+                      <div className="p-3 bg-cyan-950/60 border border-cyan-800/50 rounded-xl text-cyan-300 font-semibold">
+                        Global Master Services Agreement | Enterprise Advisory Framework
+                      </div>
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 pt-2">1. Scope of Advisory Services</h3>
+                      <p>Elvyvor provides enterprise technology consulting, multi-cloud architecture engineering, application modernization, and zero-trust cybersecurity governance as defined under signed Statements of Work (SOW).</p>
+                      
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 pt-2">2. Intellectual Property Rights</h3>
+                      <p>All custom software code, data pipelines, and architecture configurations created specifically for clients remain the exclusive property of the client upon fulfillment of engagement milestones.</p>
+
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 pt-2">3. Service Level Guarantees</h3>
+                      <p>Advisory and managed infrastructure systems carry guaranteed operational SLAs up to 99.99% availability backed by round-the-clock Security Operations Center (SOC) oversight.</p>
+                    </>
+                  )}
+
+                  {policyModal === 'security' && (
+                    <>
+                      <div className="p-3 bg-cyan-950/60 border border-cyan-800/50 rounded-xl text-cyan-300 font-semibold">
+                        Certified Compliance Posture & International Standards
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                          <p className="font-bold text-white text-sm">ISO 27001:2022</p>
+                          <p className="text-slate-400 text-[11px] mt-1">Certified Information Security Management System (ISMS) across all advisory facilities.</p>
+                        </div>
+
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                          <p className="font-bold text-white text-sm">SOC 2 Type II</p>
+                          <p className="text-slate-400 text-[11px] mt-1">Annual third-party audit verifying security, availability, and processing integrity controls.</p>
+                        </div>
+
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                          <p className="font-bold text-white text-sm">PCI-DSS v4.0</p>
+                          <p className="text-slate-400 text-[11px] mt-1">Level 1 certified compliance for financial transaction pipelines & microservices architecture.</p>
+                        </div>
+
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                          <p className="font-bold text-white text-sm">HIPAA & GDPR</p>
+                          <p className="text-slate-400 text-[11px] mt-1">End-to-end encrypted medical data lakehouse governance with audit tracking.</p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-[11px] text-slate-400 mt-4">
+                        <p className="text-white font-semibold mb-1">Automated Vulnerability Monitoring:</p>
+                        <p>Continuous automated penetration testing and eBPF kernel-level runtime security checks executed 24/7 across all client clusters.</p>
+                      </div>
+                    </>
+                  )}
+
+                </div>
+
+                {/* Modal Footer */}
+                <div className="bg-slate-950 p-4 border-t border-slate-800 flex justify-end">
+                  <button 
+                    onClick={() => setPolicyModal(null)}
+                    className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold border border-slate-700"
+                  >
+                    Close Document
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* INTERACTIVE DOMAIN CASE STUDY DOCUMENT READER MODAL */}
+          {selectedCaseStudy && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full my-8 overflow-hidden shadow-2xl relative">
+                <div className="bg-slate-950 p-6 border-b border-slate-800 flex justify-between items-start">
+                  <div>
+                    <span className="text-xs font-mono uppercase text-cyan-400 bg-cyan-950 px-2.5 py-1 rounded border border-cyan-800">
+                      {selectedCaseStudy.industry}
+                    </span>
+                    <h2 className="text-2xl font-black text-white mt-2">{selectedCaseStudy.title}</h2>
+                    <p className="text-slate-400 text-xs mt-1">{selectedCaseStudy.subtitle}</p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedCaseStudy(null)} 
+                    className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                  >
+                    <Icon name="x" className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="p-6 md:p-8 space-y-6 text-xs text-slate-300 max-h-[70vh] overflow-y-auto">
+                  <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <p className="text-slate-400"><strong className="text-slate-200">Client Profile:</strong> {selectedCaseStudy.client}</p>
+                    <p className="text-slate-300 leading-relaxed"><strong className="text-cyan-400">Executive Summary:</strong> {selectedCaseStudy.execSummary}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 mb-2">Operational Challenge</h3>
+                    <p className="bg-slate-950 p-4 rounded-xl border border-slate-800 leading-relaxed text-slate-300">{selectedCaseStudy.challenge}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 mb-2">Solution Architecture & Strategy</h3>
+                    <ul className="space-y-2 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                      {selectedCaseStudy.architecture.map((arch, i) => (
+                        <li key={i} className="flex items-start">
+                          <Icon name="check-circle-2" className="w-4 h-4 text-cyan-400 mr-2 flex-shrink-0 mt-0.5" />
+                          <span>{arch}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 mb-2">Verified Impact Metrics</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      {selectedCaseStudy.impact.map((imp, i) => (
+                        <div key={i} className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
+                          <p className="text-2xl font-black text-cyan-400">{imp.value}</p>
+                          <p className="text-[11px] text-slate-400 mt-1">{imp.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider text-cyan-400 mb-2">Technologies Deployed</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCaseStudy.techStack.map((tech, i) => (
+                        <span key={i} className="px-3 py-1 bg-slate-800 border border-slate-700 text-slate-200 rounded-lg font-mono text-[11px]">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950 p-6 border-t border-slate-800 flex flex-wrap justify-between items-center gap-4">
+                  <button 
+                    onClick={() => window.print()}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center space-x-2 border border-slate-700"
+                  >
+                    <Icon name="printer" className="w-4 h-4 text-cyan-400" />
+                    <span>Print Blueprint</span>
+                  </button>
+
+                  <button 
+                    onClick={() => {
+                      setSelectedCaseStudy(null);
+                      navigateTo('contact');
+                    }}
+                    className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg shadow-cyan-500/20"
+                  >
+                    Engage Practice Lead
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ROI CALCULATOR MODAL */}
+          {roiModalOpen && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 md:p-8 max-w-lg w-full space-y-6 relative shadow-2xl">
+                <button onClick={() => setRoiModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                  <Icon name="x" className="w-5 h-5" />
+                </button>
+                
+                <div className="flex items-center space-x-3">
+                  <Icon name="calculator" className="w-6 h-6 text-cyan-400" />
+                  <h2 className="text-2xl font-bold text-white">Enterprise ROI Calculator</h2>
+                </div>
+
+                <form onSubmit={calculateROI} className="space-y-4 text-xs">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-2">Number of System Users / Workforce</label>
+                    <input 
+                      type="number" 
+                      value={roiInputs.employees} 
+                      onChange={(e) => setRoiInputs({...roiInputs, employees: Number(e.target.value)})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500" 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-2">Annual Legacy Operating Budget ($)</label>
+                    <input 
+                      type="number" 
+                      value={roiInputs.legacyCost} 
+                      onChange={(e) => setRoiInputs({...roiInputs, legacyCost: Number(e.target.value)})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500" 
+                    />
+                  </div>
+
+                  <button type="submit" className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl uppercase tracking-wider text-xs shadow-lg shadow-cyan-500/20">
+                    Calculate ROI Multiplier
+                  </button>
+                </form>
+
+                {roiResult && (
+                  <div className="p-4 bg-slate-950 border border-cyan-500/30 rounded-xl space-y-2 text-xs">
+                    <p className="text-cyan-400 font-bold uppercase">Estimated Annual Impact:</p>
+                    <div className="grid grid-cols-2 gap-2 text-slate-200">
+                      <div>Legacy Cost Reduction: <span className="font-bold text-white">${roiResult.annualSavings.toLocaleString()}</span></div>
+                      <div>Productivity Multiplier: <span className="font-bold text-white">${roiResult.productivityGain.toLocaleString()}</span></div>
+                    </div>
+                    <p className="text-green-400 font-bold pt-1">Estimated Net ROI: {roiResult.netROI}% over 3 Years</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TECHNICAL ARCHITECTURE SPEC MODAL */}
+          {archModalOpen && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 md:p-8 max-w-2xl w-full space-y-6 relative shadow-2xl">
+                <button onClick={() => setArchModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                  <Icon name="x" className="w-5 h-5" />
+                </button>
+
+                <div className="flex items-center space-x-3">
+                  <Icon name="layers" className="w-6 h-6 text-cyan-400" />
+                  <h2 className="text-2xl font-bold text-white">Elvyvor Architecture Blueprint Specs</h2>
+                </div>
+
+                <div className="space-y-4 text-xs text-slate-300">
+                  <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                    <p className="font-bold text-white">1. Multi-Region Edge Mesh Layer</p>
+                    <p className="text-slate-400">Global Anycast Routing, WAF Layer 7 DDoS mitigation, TLS 1.3 encryption.</p>
+                  </div>
+                  <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                    <p className="font-bold text-white">2. Microservices Application Core</p>
+                    <p className="text-slate-400">Kubernetes EKS auto-scaling clusters, gRPC transport, Istio service mesh security.</p>
+                  </div>
+                  <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                    <p className="font-bold text-white">3. Data & Private AI Pipeline</p>
+                    <p className="text-slate-400">Apache Kafka event sourcing, Snowflake Data Warehouse, isolated GPU LLM inference nodes.</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button 
+                    onClick={() => setArchModalOpen(false)}
+                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold"
+                  >
+                    Close Specification
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* REGION SELECTOR MODAL */}
+          {regionModalOpen && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full space-y-4 relative shadow-2xl">
+                <button onClick={() => setRegionModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                  <Icon name="x" className="w-5 h-5" />
+                </button>
+
+                <h2 className="text-xl font-bold text-white">Select Regional Operating Center</h2>
+
+                <div className="space-y-2 text-xs">
+                  {[
+                    "Asia Pacific (India - HQ)",
+                    "North America (East - USA)",
+                    "Europe (EMEA - UK & Germany)",
+                    "Latin America & Caribbean"
+                  ].map((reg, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        setSelectedRegion(reg);
+                        setRegionModalOpen(false);
+                      }}
+                      className={`w-full p-3 rounded-xl text-left border transition-all ${
+                        selectedRegion === reg 
+                          ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold' 
+                          : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
+                      }`}
+                    >
+                      {reg}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SEARCH OVERLAY */}
+          {searchOpen && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-start justify-center pt-24 px-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-2xl w-full space-y-4 relative shadow-2xl">
+                <button onClick={() => setSearchOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                  <Icon name="x" className="w-5 h-5" />
+                </button>
+
+                <div className="relative">
+                  <Icon name="search" className="w-5 h-5 text-slate-400 absolute left-4 top-3.5" />
+                  <input 
+                    type="text" 
+                    autoFocus
+                    placeholder="Search services, case studies, whitepapers, or solutions..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <div className="text-xs text-slate-400">
+                  <p className="font-semibold text-slate-300 mb-2">Quick Search Shortcuts:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['Banking Case Study', 'Healthcare Case Study', 'Cloud Migration', 'ROI Tool', 'Careers', 'Contact'].map((tag, i) => (
+                      <button 
+                        key={i}
+                        onClick={() => {
+                          setSearchQuery(tag);
+                        }}
+                        className="px-3 py-1 bg-slate-950 border border-slate-800 rounded-lg hover:text-cyan-400 hover:border-cyan-500"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    // Render the React App into DOM
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
